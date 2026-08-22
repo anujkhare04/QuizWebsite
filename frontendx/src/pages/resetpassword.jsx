@@ -47,13 +47,12 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center px-4">
-      <div className="w-full max-w-md rounded-2xl border border-white/10 bg-white/5 p-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold mb-2">Reset Password</h1>
-        <button className="font-bold">username</button>
+    <div className="flex min-h-screen items-center justify-center bg-black px-4 text-white">
+      <div className="w-full max-w-md rounded-3xl border border-white/10 bg-white/10 p-6 shadow-2xl backdrop-blur-xl sm:p-8">
+        <div>
+          <h1 className="mb-2 text-3xl font-black f3">Reset Password</h1>
         </div>
-        <p className="text-sm text-white/70 mb-6"> 
+        <p className="mb-6 text-sm text-white/60 f3"> 
           Enter your new password for this account.
         </p>
 
@@ -65,7 +64,7 @@ const ResetPassword = () => {
             placeholder="New password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
-            className="w-full rounded-lg border border-white/20 bg-transparent px-4 py-3 outline-none focus:border-yellow-400"
+            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 outline-none transition focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/30"
           />
 
           <input
@@ -73,13 +72,13 @@ const ResetPassword = () => {
             placeholder="Confirm new password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full rounded-lg border border-white/20 bg-transparent px-4 py-3 outline-none focus:border-yellow-400"
+            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 outline-none transition focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/30"
           />
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-yellow-400 text-black font-semibold px-4 py-3 disabled:opacity-60"
+            className="w-full rounded-xl bg-yellow-400 px-4 py-3 font-bold text-black transition hover:bg-yellow-300 disabled:opacity-60"
           >
             {loading ? "Resetting..." : "Reset Password"}
           </button>

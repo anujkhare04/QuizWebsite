@@ -15,7 +15,14 @@ const transport=nodemailer.createTransport({
 
 
 const sendResetEmail = async (email, token,username) => {
-  const frontendBaseUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+  const configuredUrl = process.env.FRONTEND_URL?.trim();
+  const isLocalUrl = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(configuredUrl || "");
+  const deployedUrl = "https://quiz-website-gules-seven.vercel.app";
+  const frontendBaseUrl = (
+    process.env.NODE_ENV === "production"
+      ? (configuredUrl && !isLocalUrl ? configuredUrl : deployedUrl)
+      : configuredUrl || "http://localhost:5173"
+  ).replace(/\/$/, "");
   const link = `${frontendBaseUrl}/reset/${token}`;
    
   try {
@@ -40,6 +47,7 @@ const sendResetEmail = async (email, token,username) => {
 
   } catch (err) {
     console.error("MAIL ERROR:", err);
+    throw err;
   }
 };
 

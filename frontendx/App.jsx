@@ -5,13 +5,10 @@ import Home from "./src/pages/home";
 import CreateQuiz from "./src/pages/creatquiz";
 import Login from "./src/pages/login";
 import MockTest from "./src/pages/MockTest";
-// import Quizchoose from "./pages/quizchose";
-// import Testsetup from "./pages/testsetup";
 import { Route, Routes } from "react-router-dom";
 import QuizParent from "./src/pages/quizparents";
 import Testwindow from "./src/pages/testwindow";
 import Profile from "./src/components/profile";
-import MainLayout from "./src/components/MainLayout";
 import AuthLayout from "./src/components/AuthLayout";
 import { axiosInstance } from "./src/axios/axiosinstance";
 import { ToastContainer } from "react-toastify";
@@ -26,42 +23,37 @@ const App = () => {
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem("token");
-      if (!token) return;
+      if (!token) {
+        dispatch(removeuser());
+        return;
+      }
       try {
         const res = await axiosInstance.get("/auth/profile");
-        console.log(res);
-
         dispatch(adduser(res.data));
       } catch (err) {
         console.log(err);
         dispatch(removeuser());
       }
     };
-
     checkAuth();
   }, [dispatch]);
 
   return (
     <div className="min-h-screen">
-      <ToastContainer position="top-right" autoClose={3000} theme="dark" />
-
+      <ToastContainer position="top-right" autoClose={3500} theme="dark" closeOnClick newestOnTop pauseOnHover draggable className="right-4! top-4! w-[calc(100%-2rem)]! sm:w-[380px]!" toastClassName="!min-h-0 !rounded-2xl !border !border-white/[0.08] !bg-gradient-to-br !from-[#1c1f27]/95 !to-[#111318]/95 !px-4 !py-3 !text-white !shadow-[0_12px_40px_rgba(0,0,0,0.45)] !backdrop-blur-2xl" bodyClassName="!m-0 !p-0" progressClassName="!h-[3px] !rounded-full !bg-gradient-to-r !from-amber-300 !via-amber-400 !to-orange-400" />
       <Pcontext>
         <Routes>
-          {/* <Route element={<MainLayout />}> */}
-            <Route path="/" element={<Home />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/mocktest" element={<MockTest />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/Dashboard" element={<Dashboard />} />
+          <Route path="/reset/:token" element={<ResetPassword />} />
+          <Route path="/categories/:cat" element={<Testwindow />} />
+          <Route path="/qchose" element={<QuizParent />} />
+          <Route element={<AuthLayout />}>
             <Route path="/create-quiz" element={<CreateQuiz />} />
-          {/* </Route> */}
-
-          {/* <Route element={<AuthLayout />}> */}
-            <Route path="/mocktest" element={<MockTest />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/Dashboard" element={<Dashboard />} />
-            <Route path="/reset/:token" element={<ResetPassword />} />
-
-            <Route path="/categories/:cat" element={<Testwindow />} />
-            <Route path="/qchose" element={<QuizParent />} />
-          {/* </Route> */}
+          </Route>
         </Routes>
       </Pcontext>
     </div>

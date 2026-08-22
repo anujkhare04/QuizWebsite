@@ -25,7 +25,9 @@ const authslice = createSlice({
     
 
     removeuser: (state) => {
-      (state.user = null), (state.islogged = false);
+      state.user = null;
+      state.islogged = false;
+      state.isloading = false;
     },
   },
 });

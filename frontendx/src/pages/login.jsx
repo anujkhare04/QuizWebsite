@@ -57,7 +57,7 @@ const Auth = () => {
 
       
       {showPop && (
-        <div className="fixed inset-0 left-100 z-50 bg-black/70 backdrop-blur-sm lg:hidden flex items-start justify-center p-4 pt-20 overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm lg:hidden flex items-start justify-center p-4 pt-20 overflow-y-auto">
           <div className="w-full max-w-md">
             <div className="mb-3 flex justify-end">
               <button

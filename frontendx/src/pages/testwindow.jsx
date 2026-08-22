@@ -216,7 +216,7 @@ const Testwindow = ({ quizData }) => {
 
   const getapi = async () => {
   try {
-    const data = await getcategory(cat);
+    const data = await getcategory(cat, saved.quizSource || "all");
 
     console.log(data);
     
@@ -685,7 +685,7 @@ const stats = {
       {(status === "lost" || status === "finished" || status === "score") && (
         <div className="fixed inset-0  flex flex-col items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-in fade-in duration-500">
           <div
-            className={`  w-full p-8 md:p-12 h-full  rounded-[40px] text-center shadow-2xl relative  ${status === "lost" ? "bg-linear-to-r from-black via-red-600 to-black  " : "bg-linear-to-r from-yellow-400 via-black to-green-600"
+            className={`  w-full p-6 md:p-12 max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-[40px] text-center shadow-2xl relative  ${status === "lost" ? "bg-linear-to-r from-black via-red-600 to-black  " : "bg-linear-to-r from-yellow-400 via-black to-green-600"
               }`}
           >
             <div className="relative ">
@@ -769,13 +769,13 @@ const stats = {
                 </button>
                 <button
                   onClick={() => navigate("/")}
-                  className="bg-white/20 text-white rounded-2xl py-4 font-bold border border-white hover:bg-white/30 transition-all active:scale-95 col-span-2 md:col-span-1"
+                  className="bg-white/20 text-white rounded-2xl py-4 font-bold border border-white hover:bg-white/30 transition-all active:scale-95"
                 >
                   Home
                 </button>
                 <button
                   onClick={() =>setshowpopup(prev=>!prev)}
-                  className="bg-white/20 text-white rounded-2xl py-4 font-bold border border-white hover:bg-white/30 transition-all active:scale-95 col-span-2 md:col-span-1"
+                  className="bg-white/20 text-white rounded-2xl py-4 font-bold border border-white hover:bg-white/30 transition-all active:scale-95"
                 >
                  <span> <i class="text-lg ri-save-line"></i></span>
                  <span> Save Stats</span>

@@ -5,7 +5,12 @@ const User = require('../../model/auth')
 
 module.exports.createQuiz = async (req, res) => {
     try {
-        const quiz = await Quiz.create(req.body);
+    const quiz = await Quiz.create({
+      title: req.body.title,
+      category: req.body.category,
+      questions: req.body.questions,
+      createdBy: req.userId,
+    });
         res.json(quiz);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -200,8 +205,10 @@ module.exports.getLeaderboard = async (req, res) => {
 module.exports.random = async (req, res) => {
 
     try {
-        const getquiz = await Quiz.aggregate([{ $sample: { size: 1 } }])
-        if (!getquiz) {
+    const getquiz = await Quiz.aggregate([
+      { $sample: { size: 1 } },
+    ])
+        if (!getquiz.length) {
             return res.status(404).json({ message: "No quizzes found" });
         }
         res.json(getquiz[0]);
@@ -213,18 +220,31 @@ module.exports.random = async (req, res) => {
 module.exports.getByCategory = async (req, res) => {
     try {
         const { cat } = req.params;
-        const quizzes = await Quiz.find({ category: cat });
+  const ownerFilter = req.query.scope === "mine" ? { createdBy: req.userId } : {};
+  const quizzes = await Quiz.find({ category: cat, ...ownerFilter });
         res.json(quizzes);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 };
 
+module.exports.getMyQuizzes = async (req, res) => {
+  try {
+    const quizzes = await Quiz.find({ createdBy: req.userId })
+      .sort({ _id: -1 })
+      .lean();
+    res.json(quizzes);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 
 module.exports.getMixedCategories = async (req, res) => {
     try {
 
-        const categories = await Quiz.distinct("category");
+    const ownerFilter = req.query.scope === "mine" ? { createdBy: req.userId } : {};
+    const categories = await Quiz.distinct("category", ownerFilter);
 
         if (!categories.length) {
             return res.status(404).json({ message: "No categories found" });
@@ -234,7 +254,7 @@ module.exports.getMixedCategories = async (req, res) => {
         const mixedQuizzes = await Promise.all(
             categories.map(async (cat) => {
                 const quiz = await Quiz.aggregate([
-                    { $match: { category: cat } },
+                    { $match: { category: cat, ...ownerFilter } },
                     { $sample: { size: 1 } }
                 ]);
                 return quiz[0];
@@ -251,7 +271,8 @@ module.exports.getMixedCategories = async (req, res) => {
 module.exports.getcategory = async (req, res) => {
     try {
         // get all distinct categories from quizzes
-        const categories = await Quiz.distinct("category");
+    const ownerFilter = req.query.scope === "mine" ? { createdBy: req.userId } : {};
+    const categories = await Quiz.distinct("category", ownerFilter);
 
         if (!categories.length) {
             return res.status(404).json({ message: "No categories found" });

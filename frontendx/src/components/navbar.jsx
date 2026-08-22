@@ -3,7 +3,7 @@ import Logo from "./Logo";
 import { removeuser } from "../feature/auth.slice";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { getAllCategories } from "../api/createApi";
+import { getAllCategories, getMyQuizzes } from "../api/createApi";
 import { logoutUser } from "../api/authapi";
 import { useState } from "react";
 
@@ -16,10 +16,22 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
    const [loading2, setLoading2] = useState(true);
+  const [hasUserQuizzes, setHasUserQuizzes] = useState(false);
 
 
 
   const [isOpen, setIsOpen] = useState(false);
+
+  React.useEffect(() => {
+    if (!user) {
+      setHasUserQuizzes(false);
+      return;
+    }
+
+    getMyQuizzes()
+      .then((quizzes) => setHasUserQuizzes(Array.isArray(quizzes) && quizzes.length > 0))
+      .catch(() => setHasUserQuizzes(false));
+  }, [user]);
 
   const handleClick = () => {
     setLoading(true);
@@ -101,7 +113,7 @@ const Navbar = () => {
 
             {user ? (
               <>
-                {/* Desktop Profile */}
+               
                 <Link
                   to="/Dashboard"
                   className="hidden md:flex px-2 py-2 text-white font-medium rounded-full hover:bg-white/10 transition-all duration-300 border-2 items-center gap-2"
@@ -114,7 +126,7 @@ const Navbar = () => {
                   <span className="hidden lg:inline">Profile</span>
                 </Link>
 
-                {/* Mobile Logout Icon */}
+               
                 <button
                   onClick={async () => {
                     setIsOpen(false);
@@ -146,13 +158,15 @@ const Navbar = () => {
             
  
 
-  <button
-    onClick={handleClick2}
-    className="f3 px-3 py-2 from-black to-green-600 text-purple-600 font-bold rounded-full shadow-xl border-2 hover:shadow-2xl active:scale-95 transition-all duration-300 flex items-center gap-2 group"
-  >
-    <span>Get Started</span>
-    <i className="ri-arrow-right-line group-hover:translate-x-1 transition-transform"></i>
-  </button>
+  {user && hasUserQuizzes && (
+    <button
+      onClick={handleClick2}
+      className="f3 px-3 py-2 from-black to-green-600 text-purple-600 font-bold rounded-full shadow-xl border-2 hover:shadow-2xl active:scale-95 transition-all duration-300 flex items-center gap-2 group"
+    >
+      <span>PlayGround</span>
+      <i className="ri-arrow-right-line group-hover:translate-x-1 transition-transform"></i>
+    </button>
+  )}
   
  </div>
  
@@ -196,6 +210,16 @@ const Navbar = () => {
           >
             Random Quiz
           </button>
+
+          {user && hasUserQuizzes && (
+            <button
+              onClick={handleClick2}
+              className="flex w-full items-center justify-between rounded-xl border-2 border-white bg-white px-4 py-3 text-left font-bold text-purple-600 transition-all hover:bg-white/90 active:scale-[0.98] f3"
+            >
+              <span>PlayGround</span>
+              <i className="ri-arrow-right-line"></i>
+            </button>
+          )}
 
           
 

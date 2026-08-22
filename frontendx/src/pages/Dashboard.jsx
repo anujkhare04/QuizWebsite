@@ -6,6 +6,7 @@ import Profile from "../components/profile";
 import Performance from "../components/performance";
 import DashboardTabs from "../components/dashboard";
 import BadgesPage from "../components/badges";
+import YourQuizzes from "../components/yourquizzes";
 
 const Dashboard = () => {
 
@@ -21,6 +22,7 @@ const Dashboard = () => {
       {activeTab === "leaderboard" && <Leaderboard />}
       {activeTab === "badges" && <BadgesPage />}
       {activeTab === "ai" && <AISuggestions />}
+      {activeTab === "quizzes" && <YourQuizzes />}
 
     </div>
   );

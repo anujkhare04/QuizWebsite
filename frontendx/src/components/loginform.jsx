@@ -76,6 +76,7 @@ const LoginForm = ({ setflag }) => {
       
     } catch (error) {
         console.log("error in forgot password", error);
+        toast.error(error?.response?.data?.msg || "Unable to send the reset link. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -157,9 +158,9 @@ const LoginForm = ({ setflag }) => {
       </div>
 
       {showForgot && (
-        <div className="fixed  rounded-4xl flex flex-col   gap-5 inset-0 bg-black p-4 sm:p-6  backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="w-full space-y-2 max-w-md mx-4 p-6 sm:p-8   rounded-2xl">
-            <h2 className="text-3xl md:text-4xl f3  font-black text-white mb-2">
+        <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-black/85 p-4 backdrop-blur-md">
+          <div className="w-full max-w-md space-y-5 rounded-3xl border border-white/10 bg-[#11151c]/95 p-6 shadow-2xl sm:p-8">
+            <h2 className="mb-2 text-3xl font-black text-white md:text-4xl f3">
               Reset Password
             </h2>
 
@@ -167,38 +168,39 @@ const LoginForm = ({ setflag }) => {
 
             {!Esent ? (
               
-              <div className="w-full flex flex-col gap-10">
-                <p className="text-white/60 text-sm  font-medium">
+              <div className="flex w-full flex-col gap-8">
+                <p className="text-sm font-medium text-white/60">
                   Please enter your registered email
                 </p>
  
-                <div className="flex items-center justify-between gap-4">
+                <div className="flex w-full items-center gap-3">
                   <input
                   type="email"
                   placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-sm max-w-sm bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all rounded-lg px-5 border-3 py-2"
+                  className="min-w-0 flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 transition-all focus:outline-none focus:ring-2 focus:ring-yellow-400"
                 />
 
                 
                   <button
-                    className="text-white hover:text-yellow-400 font-bold underline decoration-white/20 underline-offset-4 transition-colors"
+                    aria-label="Send password reset link"
+                    className="shrink-0 rounded-xl bg-yellow-400 p-3 font-bold text-black transition hover:bg-yellow-300"
                     type="button"
                     onClick={forget}
                   >
-                   <i className="ri-send-plane-fill bg-white p-2  text-black rounded-3xl"></i>
+                   <i className="ri-send-plane-fill text-lg"></i>
                   </button>
                 </div>
               </div>
             ) : (
-              <div className="w-full flex flex-col gap-10 items-center justify-center"> 
-                <p className="text-green-400 text-sm font-medium mt-4  text-center">
+              <div className="flex w-full flex-col items-center justify-center gap-8"> 
+                <p className="mt-4 text-center text-sm font-medium text-green-400">
                   A password reset link has been sent to <span className="font-semibold">{email || "your email"}</span>. Check your inbox and follow the instructions.
                 </p>
                 <button
                   onClick={() => setEsent(false)}
-                  className="text-white hover:text-yellow-400 flex  font-bold underline decoration-white/20 underline-offset-4 transition-colors"
+                  className="font-bold text-white underline decoration-white/20 underline-offset-4 transition-colors hover:text-yellow-400"
                 >
                   Try Another Email
                 </button>
@@ -216,7 +218,7 @@ const LoginForm = ({ setflag }) => {
           <button
               type="button"
               onClick={() => setShowForgot(false)}
-              className="mt-6 px-6 py-1 rounded-2xl bg-white text-black"
+              className="rounded-xl border border-white/15 bg-white/10 px-5 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
             >
               back
             </button>

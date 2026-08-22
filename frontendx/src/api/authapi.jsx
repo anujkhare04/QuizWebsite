@@ -1,87 +1,69 @@
 import axiosInstance from "../axios/axiosinstance";
-import { toast } from "react-toastify";
 
 export const registerUser = async (data) => {
   try {
-    console.log("sending data:", data);
-    let newUser = await axiosInstance.post("/auth/register", data);  
-    console.log(newUser);
-    if (newUser) {
-      console.log("User Registered  ");
-      toast.success("User Registered !!");
-      if (newUser.data?.token) {
-        localStorage.setItem("token", newUser.data.token);
-      }
-      return newUser.data;
+    const res = await axiosInstance.post("/auth/register", data);
+    if (res.data?.token) {
+      localStorage.setItem("token", res.data.token);
     }
+    return res.data;
   } catch (error) {
-    const message =
-      error?.response?.data?.message || "Registration failed. Please try again.";
-    console.log("error in registration", error);
-    toast.error(message);
-    throw new Error(message);
+    console.log("error in register user", error);
+    throw error;
   }
 };
 
 export const loginUser = async (data) => {
   try {
-    console.log("Sending login data:", data);
-    let loggedinUser = await axiosInstance.post("/auth/login", data);
-    console.log(loggedinUser);
-    
-    if (loggedinUser) {
-      console.log("user logged in ");
-      toast.success("User logged in !!");
-      if (loggedinUser.data?.token) {
-        localStorage.setItem("token", loggedinUser.data.token);
-      }
-      return loggedinUser.data.user;
+    const res = await axiosInstance.post("/auth/login", data);
+    if (res.data?.token) {
+      localStorage.setItem("token", res.data.token);
     }
+    return res.data?.user || res.data;
   } catch (error) {
-    const message =
-      error?.response?.data?.message || "Login failed. Please try again.";
-    console.log("error in Login", error);
-    toast.error(message);
-    throw new Error(message);
+    console.log("error in login user", error);
+    throw error;
   }
 };
 
 export const logoutUser = async () => {
   try {
-    let res = await axiosInstance.post("/auth/logout");
-    localStorage.removeItem("token");
-    if (res) {
-      toast.success("User logout ");
-      return res.data.message;                     
-    }
+    await axiosInstance.post("/auth/logout");
   } catch (error) {
-    console.log("error in logout", error);
+    console.log("error in logout user", error);
+  } finally {
     localStorage.removeItem("token");
   }
 };
 
 export const forgotpass = async (email) => {
-  try { 
-    let res = await axiosInstance.post("/auth/forgot", { email });
-    if (res) {
-      toast.success("If an account exists, a reset link has been sent.");
-      return res.data.message;                     
-    }
+  try {
+    const res = await axiosInstance.post("/auth/forgot", { email });
+    return res.data;
   } catch (error) {
-    console.log("error in Email Sent to reset password", error);
+    console.log("error in forgot password", error);
+    throw error;
   }
-};  
+};
 
 export const updateProfileApi = async (formData) => {
   try {
     const res = await axiosInstance.put("/auth/profile", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
-    toast.success("Profile updated successfully");
-    return res.data?.user;
+    return res.data?.user || res.data;
   } catch (error) {
-    const message = error?.response?.data?.message || "Failed to update profile";
-    toast.error(message);
-    throw new Error(message);
+    console.log("error in update profile", error);
+    throw error;
+  }
+};
+
+export const getProfile = async () => {
+  try {
+    const res = await axiosInstance.get("/auth/profile");
+    return res.data?.user || res.data;
+  } catch (error) {
+    console.log("error in get profile", error);
+    throw error;
   }
 };

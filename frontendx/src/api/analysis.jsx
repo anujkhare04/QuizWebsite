@@ -1,69 +1,31 @@
 import axiosInstance from "../axios/axiosinstance";
-import { useSelector } from "react-redux";
-
-
-
-
-
 
 export const SavedStats = async (data) => {
-
-  // console.log(data);
-
-
   try {
-    let res = await axiosInstance.post('/quiz/saved', data)
-
-    if (res) {
-
-      console.log("Quiz Stats Saved");
-      return res.data;
-
-    }
+    const res = await axiosInstance.post("/quiz/saved", data);
+    return res.data;
   } catch (error) {
     console.log("Error in Saving Stats", error);
-   
   }
-
 };
 
-export const getsaved=async(userId)=>{
-    try {
-          
-        console.log(userId);
-        
-        const getanalyis=await axiosInstance.get( `/quiz/getsaved/${userId}`)
-        
-        if (getanalyis) {
-      return getanalyis.data
-     
-    }
+export const getsaved = async (userId) => {
+  try {
+    const res = await axiosInstance.get(`/quiz/getsaved/${userId}`);
+    return res.data;
+  } catch (error) {
+    console.log("error while fetch score");
+  }
+};
 
-    } catch (error) {
-        console.log("error while fetch score");
-     
-    }
-} 
-
-
-export const getperformance=async(userId,range)=>{
-    try {
-          
-        console.log(userId);
-        console.log(range);
-        
-        const getperform=await axiosInstance.get( `/quiz/performance/${userId}?range=${range}`)
-        
-        if (getperform) {
-      return getperform.data
-     
-    }
-
-    } catch (error) {
-        console.log("error while fetch Performance");
-     
-    }
-} 
+export const getperformance = async (userId, range) => {
+  try {
+    const res = await axiosInstance.get(`/quiz/performance/${userId}?range=${range}`);
+    return res.data;
+  } catch (error) {
+    console.log("error while fetch Performance");
+  }
+};
 
 export const getLeaderboard = async (range = "global", limit = 50) => {
   try {
@@ -74,4 +36,3 @@ export const getLeaderboard = async (range = "global", limit = 50) => {
     throw error;
   }
 };
-

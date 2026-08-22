@@ -1,6 +1,7 @@
 
 const express = require("express")
 const multer = require("multer");
+const { authMiddleware } = require("../../middleware/authuser");
 const {
   getPerformance,
   getLeaderboard,
@@ -11,6 +12,7 @@ const {
   createQuiz,
   random,
   getByCategory,
+  getMyQuizzes,
   getMixedCategories,
   getcategory,
   generateMockTestTopic,
@@ -22,13 +24,14 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 
 
-router.post('/create', createQuiz)
+router.post('/create', authMiddleware, createQuiz)
 router.post('/saved', Saved)  // analysis
 router.get("/getsaved/:userId", getSaved);
-router.get('/random', random)
-router.get('/categories/:cat', getByCategory)
-router.get('/mixed', getMixedCategories);
-router.get('/categories', getcategory);
+router.get('/random', authMiddleware, random)
+router.get('/mine', authMiddleware, getMyQuizzes)
+router.get('/categories/:cat', authMiddleware, getByCategory)
+router.get('/mixed', authMiddleware, getMixedCategories);
+router.get('/categories', authMiddleware, getcategory);
 router.post('/Aiques', Aiquestions);
 router.post('/Aiques/file', upload.single("file"), AiquestionsFromFile);
 router.post('/mock-test/topic', generateMockTestTopic);
