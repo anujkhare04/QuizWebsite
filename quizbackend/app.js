@@ -15,20 +15,21 @@ const allowedOrigins = [
   "http://localhost:5174",
   "http://localhost:5175",
   "https://quiz-website-gules-seven.vercel.app",
-  "https://quiz-website-gules-seven.vercel.app",
-  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
-].filter(Boolean);
+  process.env.FRONTEND_URL,
+].filter(Boolean).map(url => url.replace(/\/$/, ""));
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      console.log("CORS request from origin:", origin);
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        console.log("CORS blocked origin:", origin);
-        callback(new Error(`CORS blocked origin: ${origin}`));
+      if (!origin) return callback(null, true);
+      const normalizedOrigin = origin.replace(/\/$/, "");
+      if (
+        allowedOrigins.includes(normalizedOrigin) ||
+        /^https:\/\/quiz-website-.*\.vercel\.app$/.test(normalizedOrigin)
+      ) {
+        return callback(null, true);
       }
+      callback(new Error(`CORS blocked origin: ${origin}`));
     },
     credentials: true,
   })
