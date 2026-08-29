@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAllCategories } from '../api/createApi';
+import { getRandomQuiz, toRandomQuizPlayState } from '../api/createApi';
 
 const Random = () => {
   const navigate = useNavigate();
@@ -8,43 +8,17 @@ const Random = () => {
   useEffect(() => {
     const startRandomQuiz = async () => {
       try {
-        // Fetch available categories
-        const categories = await getAllCategories();
+        const quiz = await getRandomQuiz();
+        const quizSettings = toRandomQuizPlayState(quiz);
 
-        if (!categories || categories.length === 0) {
-          alert("No categories available to play!");
+        if (!quizSettings) {
+          alert("No quizzes available to play!");
           navigate("/");
           return;
         }
 
-        // Randomly select one category
-        const randomCat = categories[Math.floor(Math.random() * categories.length)];
-
-        // Randomly select a mode
-        const modes = ["numberOfQuestions", "timed", "Stop on Incorrect"];
-        const randomMode = modes[Math.floor(Math.random() * modes.length)];
-
-        // Generate random settings based on mode
-        let quizSettings = {
-          category: randomCat,
-          type: randomMode
-        };
-
-        if (randomMode === "numberOfQuestions") {
-          // Random between 5 and 10 questions
-          quizSettings.questionLimit = Math.floor(Math.random() * (10 - 5 + 1)) + 5;
-        } else if (randomMode === "timed") {
-          // Random between 1 and 5 minutes
-          quizSettings.timeLimit = Math.floor(Math.random() * 5) + 1;
-        }
-
-        console.log("Starting Random Quiz:", quizSettings);
-
-        // Navigate to the game window
-        navigate(`/categories/${randomCat}`, {
-          state: {
-            quizData: quizSettings
-          }
+        navigate(`/categories/${quiz.category}`, {
+          state: { quizData: quizSettings }
         });
 
       } catch (error) {

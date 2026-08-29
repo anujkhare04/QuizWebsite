@@ -3,7 +3,7 @@ import Logo from "./Logo";
 import { removeuser } from "../feature/auth.slice";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { getAllCategories, getMyQuizzes } from "../api/createApi";
+import { getMyQuizzes, getRandomQuiz, toRandomQuizPlayState } from "../api/createApi";
 import { logoutUser } from "../api/authapi";
 import { useState } from "react";
 
@@ -59,28 +59,18 @@ const Navbar = () => {
   const handleRandomQuiz = async () => {
     setIsOpen(false);
     try {
-      const categories = await getAllCategories();
-      if (!categories || categories.length === 0) {
-        alert("No categories available to play!");
+      const quiz = await getRandomQuiz();
+      const quizSettings = toRandomQuizPlayState(quiz);
+      if (!quizSettings) {
+        alert("No quizzes available to play!");
         return;
       }
-      const randomCat = categories[Math.floor(Math.random() * categories.length)];
-      const modes = ["numberOfQuestions", "timed", "Stop on Incorrect"];
-      const randomMode = modes[Math.floor(Math.random() * modes.length)];
-      let quizSettings = {
-        category: randomCat,
-        type: randomMode
-      };
-      if (randomMode === "numberOfQuestions") {
-        quizSettings.questionLimit = Math.floor(Math.random() * (10 - 5 + 1)) + 5;
-      } else if (randomMode === "timed") {
-        quizSettings.timeLimit = Math.floor(Math.random() * 5) + 1;
-      }
-      navigate(`/categories/${randomCat}`, {
+      navigate(`/categories/${quiz.category}`, {
         state: { quizData: quizSettings }
       });
     } catch (error) {
       console.error("Failed to start random quiz:", error);
+      alert(error?.response?.data?.message || "Failed to start random quiz");
     }
   };
 

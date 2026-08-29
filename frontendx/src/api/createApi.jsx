@@ -21,6 +21,40 @@ export const getAllCategories = async (scope = "all") => {
   return res.data;
 };
 
+export const getRandomQuiz = async () => {
+  const res = await axiosInstance.get("/quiz/random");
+  return res.data;
+};
+
+export const RANDOM_QUIZ_MODES = ["numberOfQuestions", "timed", "Stop on Incorrect"];
+
+export const toRandomQuizPlayState = (quiz, mode) => {
+  if (!quiz?.questions?.length) return null;
+
+  const type =
+    mode && RANDOM_QUIZ_MODES.includes(mode)
+      ? mode
+      : RANDOM_QUIZ_MODES[Math.floor(Math.random() * RANDOM_QUIZ_MODES.length)];
+
+  const quizSettings = {
+    category: quiz.category,
+    type,
+    quizId: quiz._id,
+    questions: quiz.questions,
+    quizSource: "random",
+  };
+
+  if (type === "numberOfQuestions") {
+    const max = quiz.questions.length;
+    const min = Math.min(5, max);
+    quizSettings.questionLimit = Math.floor(Math.random() * (max - min + 1)) + min;
+  } else if (type === "timed") {
+    quizSettings.timeLimit = Math.floor(Math.random() * 5) + 1;
+  }
+
+  return quizSettings;
+};
+
 export const getMyQuizzes = async () => {
   const res = await axiosInstance.get("/quiz/mine");
   return res.data;

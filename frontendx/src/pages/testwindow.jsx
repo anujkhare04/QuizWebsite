@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { getcategory, getAllCategories } from "../api/createApi";
+import { getcategory, getRandomQuiz, toRandomQuizPlayState } from "../api/createApi";
 // import useQuizSecurity from "../components/hooks";
 import { toast } from "react-toastify";
 import { SavedStats } from "../api/analysis";
 import { useSelector } from "react-redux";
 import { getsaved } from "../api/analysis";
+import { clearActiveQuiz, loadActiveQuiz, saveActiveQuiz } from "../utils/quizSession";
+
 
 
 
@@ -16,10 +18,18 @@ const Testwindow = ({ quizData }) => {
    
 
   const location = useLocation();
-  const saved = location.state?.quizData;
+  const navigate = useNavigate();
+  const { cat } = useParams();
+  const cachedSession = loadActiveQuiz(cat);
+  const saved = location.state?.quizData || cachedSession?.quizData || null;
+  const restoredProgress =
+    !location.state?.quizData && cachedSession?.progress?.res?.length
+      ? cachedSession.progress
+      : null;
+  const skipReloadReset = Boolean(restoredProgress);
   const {user}= useSelector((state) => state.auth);
   const currentUser = user?.user ?? user;
- const [quizId, setQuizId] = useState(null);
+ const [quizId, setQuizId] = useState(restoredProgress?.quizId || null);
  
   
 //  console.log("Full Redux auth state:", state.auth);
@@ -28,15 +38,20 @@ const Testwindow = ({ quizData }) => {
 
   //  console.log(" quizId:",quizId);
    
-  if (!saved) return <div>Loading quiz...</div>;
-
+  if (!saved) {
+  return (
+    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center gap-4">
+      <p>Quiz session expired. Reload cleared the quiz data.</p>
+      <button onClick={() => navigate("/")}>Go Home</button>
+    </div>
+  );
+}
   const timeLimit = Number(saved.timeLimit * 60);
-  const navigate = useNavigate();
+
 
   const [status, setstatus] = useState("idle");
   const [timeLeft, setTimeLeft] = useState(timeLimit);
   const [answered, setAnswered] = useState(false);
-  const { cat } = useParams();
   const [res, setRes] = useState([]);
   const [curindex, setcurindex] = useState(0);
   const [score, setscore] = useState(0);
@@ -45,7 +60,6 @@ const Testwindow = ({ quizData }) => {
   const [questionTimes, setQuestionTimes] = useState({});
   const [Panalysis, setPanalysis] = useState([])
   const [showpopup, setshowpopup] = useState(false)
- const modes = ["numberOfQuestions", "timed", "Stop on Incorrect"];
 
 
   const calculateScore = (currentAnswers = answers) => {
@@ -79,25 +93,16 @@ const Testwindow = ({ quizData }) => {
 
   const handleRandomQuiz = async () => {
     try {
-      const categories = await getAllCategories();
-      if (!categories || categories.length === 0) {
-        alert("No categories available!");
+      const quiz = await getRandomQuiz();
+      const quizSettings = toRandomQuizPlayState(quiz);
+      if (!quizSettings) {
+        alert("No quizzes available!");
         return;
       }
-      const randomCat = categories[Math.floor(Math.random() * categories.length)];
-      const modes = ["numberOfQuestions", "timed", "Stop on Incorrect"];
-      const randomMode = modes[Math.floor(Math.random() * modes.length)];
-
-      let quizSettings = { category: randomCat, type: randomMode };
-
-      if (randomMode === "numberOfQuestions") {
-        quizSettings.questionLimit = Math.floor(Math.random() * 6) + 5;
-      } else if (randomMode === "timed") {
-        quizSettings.timeLimit = Math.floor(Math.random() * 5) + 1;
-      }
-      navigate(`/categories/${randomCat}`, { state: { quizData: quizSettings } });
+      navigate(`/categories/${quiz.category}`, { state: { quizData: quizSettings } });
     } catch (error) {
       console.error("Failed to start random quiz:", error);
+      alert(error?.response?.data?.message || "Failed to start random quiz");
     }
   };
 
@@ -107,6 +112,7 @@ const Testwindow = ({ quizData }) => {
 
 
   useEffect(() => {
+    if (skipReloadReset) return;
     setstatus("idle");
     setcurindex(0);
     setscore(0);
@@ -163,7 +169,7 @@ const Testwindow = ({ quizData }) => {
 
 
   useEffect(() => {
-    if (saved.type === "timed" && status === "playing") {
+    if (saved?.type === "timed" && status === "playing") {
       const timer = setInterval(() => {
         setTimeLeft((prev) => {
           if (prev <= 1) {
@@ -177,7 +183,7 @@ const Testwindow = ({ quizData }) => {
 
       return () => clearInterval(timer);
     }
-  }, [saved.type, status]);
+  }, [saved?.type, status]);
 
 
   useEffect(() => {
@@ -195,8 +201,45 @@ const Testwindow = ({ quizData }) => {
   }, [status, curindex]);
 
   useEffect(() => {
+    if (!saved) return;
+    if (skipReloadReset) return;
     getapi();
   }, [cat]);
+
+  useEffect(() => {
+    if (!saved || !cat) return;
+    saveActiveQuiz({
+      cat,
+      quizData: saved,
+      progress: {
+        status,
+        timeLeft,
+        answered,
+        quizId,
+        res,
+        curindex,
+        score,
+        answers,
+        QuizTimeTaken,
+        questionTimes,
+        Panalysis,
+      },
+    });
+  }, [
+    saved,
+    cat,
+    status,
+    timeLeft,
+    answered,
+    quizId,
+    res,
+    curindex,
+    score,
+    answers,
+    QuizTimeTaken,
+    questionTimes,
+    Panalysis,
+  ]);
 
 
 
@@ -216,14 +259,35 @@ const Testwindow = ({ quizData }) => {
 
   const getapi = async () => {
   try {
+    if (saved.quizSource === "random" && saved.questions?.length) {
+      const shuffled = shuffle(saved.questions);
+      setQuizId(saved.quizId);
+      if (saved.type === "numberOfQuestions") {
+        const limit = Math.min(
+          Number(saved.questionLimit) || shuffled.length,
+          shuffled.length
+        );
+        setRes(shuffled.slice(0, limit));
+      } else {
+        setRes(shuffled);
+      }
+      return;
+    }
+
     const data = await getcategory(cat, saved.quizSource || "all");
+    const quiz = saved.quizId
+      ? data.find((item) => String(item._id) === String(saved.quizId)) || data[0]
+      : data[0];
 
-    console.log(data);
-    
+    if (!quiz || !quiz.questions) {
+      toast.error("No questions found for this category");
+      navigate("/");
+      return;
+    }
 
-    const shuffled = shuffle(data[0].questions);
+    const shuffled = shuffle(quiz.questions);
 
-    setQuizId(data[0]._id);
+    setQuizId(quiz._id);
 
     if (saved.type === "numberOfQuestions") {
       const limit = Math.min(
@@ -662,7 +726,14 @@ const stats = {
           </div>
         )}
 
-        {saved.type !== "Stop on Incorrect" && (
+        {status === "idle" && (
+          <div className="flex flex-col items-center justify-center text-white gap-4">
+            <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
+            <p className="text-white/60 font-medium">Loading quiz questions...</p>
+          </div>
+        )}
+
+        {saved.type !== "Stop on Incorrect" && status === "playing" && (
           <div className="flex py-10 items-center justify-between w-full max-w-4xl mx-auto gap-4">
             <button
               onClick={() => nxtback(-1)}
