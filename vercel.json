@@ -20,12 +20,12 @@
     },
     {
       "src": "/(.*)",
-      "dest": "frontendx/$1",
+      "dest": "/$1",
       "check": true
     },
     {
       "src": "/(.*)",
-      "dest": "frontendx/index.html"
+      "dest": "/index.html"
     }
   ]
 }
