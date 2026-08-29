@@ -49,16 +49,16 @@ const Testwindow = ({ quizData }) => {
   const timeLimit = Number(saved.timeLimit * 60);
 
 
-  const [status, setstatus] = useState("idle");
-  const [timeLeft, setTimeLeft] = useState(timeLimit);
-  const [answered, setAnswered] = useState(false);
-  const [res, setRes] = useState([]);
-  const [curindex, setcurindex] = useState(0);
-  const [score, setscore] = useState(0);
-  const [answers, setAnswers] = useState({});
-  const [QuizTimeTaken, setQuizTimeTaken] = useState(0);
-  const [questionTimes, setQuestionTimes] = useState({});
-  const [Panalysis, setPanalysis] = useState([])
+  const [status, setstatus] = useState(restoredProgress?.status || "idle");
+  const [timeLeft, setTimeLeft] = useState(restoredProgress?.timeLeft ?? timeLimit);
+  const [answered, setAnswered] = useState(restoredProgress?.answered ?? false);
+  const [res, setRes] = useState(restoredProgress?.res ?? []);
+  const [curindex, setcurindex] = useState(restoredProgress?.curindex ?? 0);
+  const [score, setscore] = useState(restoredProgress?.score ?? 0);
+  const [answers, setAnswers] = useState(restoredProgress?.answers ?? {});
+  const [QuizTimeTaken, setQuizTimeTaken] = useState(restoredProgress?.QuizTimeTaken ?? 0);
+  const [questionTimes, setQuestionTimes] = useState(restoredProgress?.questionTimes ?? {});
+  const [Panalysis, setPanalysis] = useState(restoredProgress?.Panalysis ?? []);
   const [showpopup, setshowpopup] = useState(false)
 
 
@@ -396,7 +396,7 @@ const Testwindow = ({ quizData }) => {
   
 
   useEffect(() => {
-  if (res?.length) {
+  if (res?.length && !skipReloadReset) {
     setPanalysis(
       res.map(q => ({
         questionId: q._id,
@@ -406,7 +406,7 @@ const Testwindow = ({ quizData }) => {
       }))
     );
   }
-}, [res]);
+}, [res, skipReloadReset]);
  
 
 
